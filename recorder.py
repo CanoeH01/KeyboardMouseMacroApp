@@ -2,7 +2,6 @@ import time
 
 from pynput import mouse, keyboard
 
-
 class InputRecorder:
     def __init__(self):
         self.events = []
@@ -18,6 +17,12 @@ class InputRecorder:
             on_release=self.on_release)
 
     def start(self):
+        mouseStartingPoint = {
+            'type': 'mouse_move',
+            'pos': mouse.Controller().position,
+            'timestamp': 0
+        }
+        self.events.append(mouseStartingPoint)
 
         self.start_time = time.time()
         self.mouseListener.start()
@@ -31,14 +36,9 @@ class InputRecorder:
         self.mouseListener.stop()
         self.keyboardListener.stop()
 
-        for event in self.events:
-            for key in event:
-                print(key, ":", event[key])
-            print()
-
     def on_move(self, x, y):
         mouseMovement = {
-            'type' : 'move',
+            'type' : 'mouse_move',
             'pos': (x, y),
             'timestamp': self.getElapsedTime(),
         }
@@ -47,6 +47,8 @@ class InputRecorder:
     def on_click(self, x, y, button, pressed):
         mouseClick = {
             'type' : 'mouse_click',
+            'button': button,
+            'pressed': pressed,
             'pos': (x, y),
             'timestamp': self.getElapsedTime(),
         }
@@ -55,7 +57,7 @@ class InputRecorder:
     def on_scroll(self, x, y, dx, dy):
         mouseScroll = {
             'type' : 'mouse_scroll',
-            'pos': (x, y, dx, dy),
+            'pos': (dx, dy),
             'timestamp': self.getElapsedTime(),
         }
         self.events.append(mouseScroll)
@@ -63,7 +65,7 @@ class InputRecorder:
     def on_press(self, key):
         keyPress = {
             'type' : 'key_press',
-            'key': key,
+            'key': str(key),
             'timestamp': self.getElapsedTime(),
         }
         if key == keyboard.Key.esc:
@@ -74,7 +76,7 @@ class InputRecorder:
     def on_release(self, key):
         keyRelease = {
             'type' : 'key_release',
-            'key': key,
+            'key': str(key),
             'timestamp': self.getElapsedTime(),
         }
         self.events.append(keyRelease)
