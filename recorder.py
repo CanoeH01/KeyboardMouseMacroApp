@@ -1,11 +1,12 @@
 import time
-
 from pynput import mouse, keyboard
+from utils import getVirtualScreenBounds
 
 class InputRecorder:
     def __init__(self):
         self.events = []
         self.start_time = None
+        self.screen_bounds = getVirtualScreenBounds()
 
         self.mouseListener = mouse.Listener(
             on_move=self.on_move,
@@ -29,17 +30,23 @@ class InputRecorder:
         self.keyboardListener.start()
         self.keyboardListener.join()
 
-    def getElapsedTime(self):
-        return time.time() - self.start_time
-
     def stop(self):
         self.mouseListener.stop()
         self.keyboardListener.stop()
 
+    def getElapsedTime(self):
+        return time.time() - self.start_time
+
+    def normalizePosition(self, x, y):
+        norm_x = (x - self.screen_bounds[0]) / self.screen_bounds[2]
+        norm_y = (y - self.screen_bounds[1]) / self.screen_bounds[3]
+        return norm_x, norm_y
+
     def on_move(self, x, y):
+
         mouseMovement = {
             'type' : 'mouse_move',
-            'pos': (x, y),
+            'pos': self.normalizePosition(x, y),
             'timestamp': self.getElapsedTime(),
         }
         self.events.append(mouseMovement)
@@ -49,7 +56,7 @@ class InputRecorder:
             'type' : 'mouse_click',
             'button': button,
             'pressed': pressed,
-            'pos': (x, y),
+            'pos': self.normalizePosition(x, y),
             'timestamp': self.getElapsedTime(),
         }
         self.events.append(mouseClick)
