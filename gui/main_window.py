@@ -1,21 +1,44 @@
-import os
-from PySide6.QtWidgets import QMainWindow
-from PySide6.QtUiTools import QUiLoader
-from PySide6.QtCore import QFile
+from PySide6.QtCore import Qt, QThread
+from PySide6.QtGui import QKeyEvent
+from PySide6.QtWidgets import QWidget
+from InputReplayer import InputReplayer
+from RecorderWorker import RecorderWorker
+from .ui_main_window import Ui_Form
 
 
-
-class MyWindow(QMainWindow):
+class MyWindow(QWidget):
     def __init__(self):
         super().__init__()
+        self.ui = Ui_Form()
+        self.ui.setupUi(self)
 
-    def loadMainWindow(self):
-        loader = QUiLoader()
-        ui_file = QFile(os.path.join(os.path.dirname(__file__), "main_window.ui"))
-        ui_file.open(QFile.ReadOnly)
+        self.recorder = None
+        self.recording_thread = None
 
-        window = loader.load(ui_file)
-        ui_file.close()
+        self.ui.btnRecord.clicked.connect(self.btnRecord_clicked)
+        self.ui.btnReplay.clicked.connect(self.btnReplay_clicked)
 
-        return window
+    def btnRecord_clicked(self):
+        self.recording_thread = QThread()
+        self.recorder = RecorderWorker()
+        self.recorder.moveToThread(self.recording_thread)
 
+        self.recording_thread.started.connect(self.recorder.start)
+        self.recorder.recording_finished.connect(self.recording_done)
+
+        self.ui.lblRecording.setText("Recording...\nPress Esc to Stop")
+        self.recording_thread.start()
+
+    def btnReplay_clicked(self):
+        if self.recorder:
+            replayer = InputReplayer(self.recorder.get_events())
+            replayer.start()
+
+    def keyPressEvent(self, event: QKeyEvent):
+        if event.key() == Qt.Key_Escape and self.recorder:
+            self.recorder.stop()
+
+    def recording_done(self):
+        self.ui.lblRecording.setText("done")
+        self.recording_thread.quit()
+        self.recording_thread.wait()
