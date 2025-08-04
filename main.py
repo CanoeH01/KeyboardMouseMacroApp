@@ -1,11 +1,7 @@
-import recorder, replayer
+from PySide6.QtWidgets import QApplication
+from gui.main_window import MyWindow
 
-rec = recorder.InputRecorder()
-rec.start()
-
-input("press enter to replay")
-
-rep = replayer.InputReplayer(rec.events)
-rep.start()
-
-
+app = QApplication([])
+window = MyWindow().loadMainWindow()
+window.show()
+app.exec()
