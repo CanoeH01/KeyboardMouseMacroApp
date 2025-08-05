@@ -43,7 +43,6 @@ class InputRecorder:
         return norm_x, norm_y
 
     def on_move(self, x, y):
-
         mouseMovement = {
             'type' : 'mouse_move',
             'pos': self.normalizePosition(x, y),

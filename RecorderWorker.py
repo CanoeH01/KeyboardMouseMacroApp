@@ -13,7 +13,7 @@ class RecorderWorker(QObject):
 
     def start(self):
         self._is_recording = True
-        self.recorder.start()
+        self.recorder.start() # will run until recording is stopped externally
         self._is_recording = False
         self.recording_finished.emit()
 

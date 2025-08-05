@@ -6,22 +6,22 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>260</width>
-    <height>140</height>
+    <width>264</width>
+    <height>148</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="2" column="0">
-    <widget class="QPushButton" name="btnReplay">
+   <item row="1" column="2">
+    <widget class="QLabel" name="lblRecording">
      <property name="text">
-      <string>Replay</string>
+      <string/>
      </property>
     </widget>
    </item>
-   <item row="2" column="2">
+   <item row="5" column="2">
     <spacer name="horizontalSpacer">
      <property name="orientation">
       <enum>Qt::Orientation::Horizontal</enum>
@@ -37,19 +37,35 @@
      </property>
     </spacer>
    </item>
-   <item row="0" column="0">
+   <item row="1" column="0">
     <widget class="QPushButton" name="btnRecord">
      <property name="text">
       <string>Record</string>
      </property>
     </widget>
    </item>
-   <item row="0" column="2">
-    <widget class="QLabel" name="lblRecording">
+   <item row="5" column="0">
+    <widget class="QPushButton" name="btnReplay">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
      <property name="text">
-      <string/>
+      <string>Replay</string>
      </property>
     </widget>
+   </item>
+   <item row="6" column="0">
+    <widget class="QPushButton" name="btnSave">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="text">
+      <string>Save</string>
+     </property>
+    </widget>
+   </item>
+   <item row="6" column="1">
+    <widget class="QListView" name="lstSavedMacros"/>
    </item>
   </layout>
  </widget>
