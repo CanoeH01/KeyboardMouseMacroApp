@@ -1,9 +1,10 @@
+from datetime import datetime
 from PySide6.QtCore import Qt, QThread
 from PySide6.QtGui import QKeyEvent
-from PySide6.QtWidgets import QWidget, QInputDialog
+from PySide6.QtWidgets import QWidget, QInputDialog, QListWidgetItem, QTableWidgetItem
 from InputReplayer import InputReplayer
 from RecorderWorker import RecorderWorker
-from .ui_main_window import Ui_Form
+from gui.ui_main_window import Ui_Form
 from MacroManager import MacroManager
 
 
@@ -15,10 +16,39 @@ class MyWindow(QWidget):
 
         self.recorder = None
         self.recording_thread = None
+        self.file_manager = MacroManager()
 
         self.ui.btnRecord.clicked.connect(self.btnRecord_clicked)
         self.ui.btnReplay.clicked.connect(self.btnReplay_clicked)
         self.ui.btnSave.clicked.connect(self.btnSave_clicked)
+        self.ui.tblSavedMacros.itemSelectionChanged.connect(self.on_macro_selected)
+
+        self.populateMacrosList()
+    def populateMacrosList(self):
+        self.file_manager.loadMacrosMetaData()
+        self.ui.tblSavedMacros.setRowCount(len(self.file_manager.macros_metadata))
+
+        for i in range(len(self.file_manager.macros_metadata)):
+            macroDateTime = datetime.fromtimestamp(self.file_manager.macros_metadata[i]['timestamp'])
+            macroDateTime = macroDateTime.strftime("%d/%m/%Y %H:%M")
+            timeTableItem = QTableWidgetItem()
+            timeTableItem.setData(Qt.UserRole, self.file_manager.macros_metadata[i]["file_path"])
+            timeTableItem.setText(macroDateTime)
+
+            nameTableItem = QTableWidgetItem()
+            nameTableItem.setData(Qt.UserRole, self.file_manager.macros_metadata[i]["file_path"])
+            nameTableItem.setText(self.file_manager.macros_metadata[i]["name"])
+
+            self.ui.tblSavedMacros.setItem(i, 0, nameTableItem)
+            self.ui.tblSavedMacros.setItem(i, 1, timeTableItem)
+
+    def on_macro_selected(self):
+        selectedItem = self.ui.tblSavedMacros.selectedItems()
+        if not selectedItem:
+            return
+
+        file_path = self.ui.tblSavedMacros.item(selectedItem[0].row(), 0).data(Qt.UserRole)
+
 
     def btnRecord_clicked(self):
         self.recording_thread = QThread()
@@ -55,6 +85,4 @@ class MyWindow(QWidget):
         nameDialog = QInputDialog.getText(None, "Save File", "Please enter file name:")
 
         if nameDialog[1]:
-            fileSaver = MacroManager()
-            fileSaver.saveMacro(self.recorder.get_events(), nameDialog[0])
-
+            self.file_manager.saveMacro(self.recorder.get_events(), nameDialog[0])
