@@ -1,31 +1,28 @@
 from datetime import datetime
-from PySide6.QtCore import Qt, QThread
-from PySide6.QtGui import QKeyEvent
-from PySide6.QtWidgets import QWidget, QInputDialog, QListWidgetItem, QTableWidgetItem
-from InputReplayer import InputReplayer
-from RecorderWorker import RecorderWorker
-from gui.ui_main_window import Ui_Form
+from PySide6.QtCore import Qt
+from PySide6.QtWidgets import QWidget, QTableWidgetItem
+from gui.ui_main_window import Ui_formMain
+from gui.record_macro import RecordMacroForm
 from MacroManager import MacroManager
 
-
-class MyWindow(QWidget):
+class MainWindow(QWidget):
     def __init__(self):
         super().__init__()
-        self.ui = Ui_Form()
+        self.ui = Ui_formMain()
         self.ui.setupUi(self)
 
-        self.recorder = None
-        self.recording_thread = None
+        self.record_macro = None
+
         self.file_manager = MacroManager()
 
-        self.ui.btnRecord.clicked.connect(self.btnRecord_clicked)
-        self.ui.btnReplay.clicked.connect(self.btnReplay_clicked)
-        self.ui.btnSave.clicked.connect(self.btnSave_clicked)
         self.ui.tblSavedMacros.itemSelectionChanged.connect(self.on_macro_selected)
-
         self.populateMacrosList()
+
+        self.ui.btnRecordNewMacro.clicked.connect(self.record_new_macro)
+
     def populateMacrosList(self):
         self.file_manager.loadMacrosMetaData()
+        self.ui.tblSavedMacros.clearContents()
         self.ui.tblSavedMacros.setRowCount(len(self.file_manager.macros_metadata))
 
         for i in range(len(self.file_manager.macros_metadata)):
@@ -41,48 +38,17 @@ class MyWindow(QWidget):
 
             self.ui.tblSavedMacros.setItem(i, 0, nameTableItem)
             self.ui.tblSavedMacros.setItem(i, 1, timeTableItem)
+        self.ui.tblSavedMacros.sortItems(1, Qt.DescendingOrder)
 
     def on_macro_selected(self):
         selectedItem = self.ui.tblSavedMacros.selectedItems()
         if not selectedItem:
             return
-
         file_path = self.ui.tblSavedMacros.item(selectedItem[0].row(), 0).data(Qt.UserRole)
 
-
-    def btnRecord_clicked(self):
-        self.recording_thread = QThread()
-        self.recorder = RecorderWorker()
-        self.recorder.moveToThread(self.recording_thread)
-
-        self.recording_thread.started.connect(self.recorder.start)
-        self.recorder.recording_finished.connect(self.recording_done)
-
-        self.ui.lblRecording.setText("Recording...\nPress Esc to Stop")
-        self.ui.btnReplay.setEnabled(False)
-        self.ui.btnRecord.setEnabled(False)
-        self.ui.btnSave.setEnabled(False)
-        self.recording_thread.start()
-
-    def btnReplay_clicked(self):
-        if self.recorder:
-            replayer = InputReplayer(self.recorder.get_events())
-            replayer.start()
-
-    def keyPressEvent(self, event: QKeyEvent):
-        if event.key() == Qt.Key_Escape and self.recorder:
-            self.recorder.stop()
-
-    def recording_done(self):
-        self.ui.btnReplay.setEnabled(True)
-        self.ui.btnRecord.setEnabled(True)
-        self.ui.btnSave.setEnabled(True)
-        self.ui.lblRecording.setText("done")
-        self.recording_thread.quit()
-        self.recording_thread.wait()
-
-    def btnSave_clicked(self):
-        nameDialog = QInputDialog.getText(None, "Save File", "Please enter file name:")
-
-        if nameDialog[1]:
-            self.file_manager.saveMacro(self.recorder.get_events(), nameDialog[0])
+    def record_new_macro(self):
+        self.record_macro = RecordMacroForm(self)
+        self.record_macro.macro_saved.connect(self.populateMacrosList)
+        self.hide()
+        self.record_macro.exec()
+        self.show()

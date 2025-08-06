@@ -24,6 +24,7 @@ class MacroManager:
             events = json.load(file)
 
     def loadMacrosMetaData(self):
+        self.macros_metadata = []
         for file in Path("saved-macros").glob("*.json"):
             with open(file, 'r') as f:
                 macroData = json.load(f)[0]
