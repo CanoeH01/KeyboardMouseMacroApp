@@ -1,7 +1,7 @@
 from PySide6.QtCore import Qt, QThread, Signal
 from PySide6.QtGui import QKeyEvent, QColor
 from PySide6.QtWidgets import QInputDialog, QDialog, QGraphicsDropShadowEffect
-from InputReplayer import InputReplayer
+from ReplayerWorker import ReplayerWorker
 from RecorderWorker import RecorderWorker
 from gui.ui_record_macro import Ui_formRecord
 from MacroManager import MacroManager
@@ -17,7 +17,10 @@ class RecordMacroForm(QDialog):
 
         self.recorder = None
         self.recording_thread = None
+        self.replayer = None
+        self.replay_thread = None
         self.file_manager = MacroManager()
+
 
         self.ui.btnRecord.clicked.connect(self.btnRecord_clicked)
         self.ui.btnReplay.clicked.connect(self.btnReplay_clicked)
@@ -42,12 +45,32 @@ class RecordMacroForm(QDialog):
 
     def btnReplay_clicked(self):
         if self.recorder:
-            replayer = InputReplayer(self.recorder.get_events())
-            replayer.start()
+            self.replay_thread = QThread()
+            self.replayer = ReplayerWorker(self.recorder.get_events())
+            self.replayer.moveToThread(self.replay_thread)
+
+            self.replay_thread.started.connect(self.replayer.start)
+            self.replayer.replaying_finished.connect(self.replaying_done)
+            self.replayer.replaying_finished.connect(self.replay_thread.quit)
+            self.replayer.replaying_finished.connect(self.replay_thread.deleteLater)
+
+            self.ui.btnReplay.setEnabled(False)
+            self.ui.btnRecord.setEnabled(False)
+            self.ui.btnSave.setEnabled(False)
+            self.setWindowTitle("Replaying...")
+
+            self.replay_thread.start()
 
     def keyPressEvent(self, event: QKeyEvent):
         if event.key() == Qt.Key_Escape and self.recorder:
             self.recorder.stop()
+
+    def replaying_done(self):
+        self.ui.btnReplay.setEnabled(True)
+        self.ui.btnRecord.setEnabled(True)
+        self.ui.btnSave.setEnabled(True)
+        self.setWindowTitle("Create Macro")
+        self.ui.lblStopRecording.setText("Macro recorded")
 
     def recording_done(self):
         self.ui.btnReplay.setEnabled(True)
