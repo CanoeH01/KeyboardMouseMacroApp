@@ -72,8 +72,10 @@ class MainWindow(QWidget):
             self.record_macro.macro_saved.emit(True)
 
     def on_macro_selected(self):
-        if self.ui.tblSavedMacros.currentRow() is not None:
-            self.selected_macro['name'] = self.ui.tblSavedMacros.selectedItems()[0]
+        selected_items = self.ui.tblSavedMacros.selectedItems()
+
+        if selected_items:
+            self.selected_macro['name'] = selected_items[0]
             self.selected_macro['filePath'] = self.ui.tblSavedMacros.item(self.selected_macro['name'].row(), 0).data(Qt.UserRole)
 
             self.ui.btnPlayMacro.setEnabled(True)
@@ -88,7 +90,6 @@ class MainWindow(QWidget):
             self.ui.btnDeleteMacro.setEnabled(False)
             for item in self.options_context.actionItems.values():
                 item.setEnabled(False)
-
 
     def record_new_macro(self):
         self.hide()
