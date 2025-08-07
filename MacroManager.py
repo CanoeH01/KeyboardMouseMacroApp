@@ -30,3 +30,11 @@ class MacroManager:
                 macroData = json.load(f)[0]
                 macroData['file_path'] = str(file)
                 self.macros_metadata.append(macroData)
+
+    def renameMacro(self, macroPath, name = "untitled"):
+        with open (macroPath, 'r+') as file:
+            macro = json.load(file)
+            macro[0]['name'] = name
+            file.seek(0)
+            json.dump(macro, file)
+            file.truncate()
