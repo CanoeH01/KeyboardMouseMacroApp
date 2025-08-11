@@ -2,7 +2,7 @@ from datetime import datetime
 from PySide6 import QtWidgets
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QAction
-from PySide6.QtWidgets import QWidget, QTableWidgetItem, QMenu, QInputDialog
+from PySide6.QtWidgets import QWidget, QTableWidgetItem, QMenu, QInputDialog, QMessageBox
 from keyboard import register_word_listener
 from ReplayerWorker import ReplayerWorker
 from gui.ui_main_window import Ui_formMain
@@ -54,6 +54,7 @@ class MainWindow(QWidget):
         self.options_context.actionItems['rename'] = (QAction("Rename", self))
         self.options_context.actionItems['rename'].triggered.connect(self.rename_macro)
         self.options_context.actionItems['delete'] = (QAction("Delete", self))
+        self.options_context.actionItems['delete'].triggered.connect(self.delete_macro)
         self.options_context.actionItems['edit'] = (QAction("Edit", self))
         self.options_context.actionItems['repeat'] = (QAction("Repeat", self))
         self.options_context.actionItems['repeat'].setCheckable(True)
@@ -63,13 +64,6 @@ class MainWindow(QWidget):
             self.options_context.addAction(item)
 
         self.ui.btnOptions.setMenu(self.options_context)
-
-    def rename_macro(self):
-        nameDialog = QInputDialog.getText(None, "Rename Macro", "Please enter a new name for macro: " + self.selected_macro['name'].text())
-
-        if nameDialog[1]:
-            self.file_manager.renameMacro(self.selected_macro['filePath'], nameDialog[0])
-            self.record_macro.macro_saved.emit(True)
 
     def on_macro_selected(self):
         selected_items = self.ui.tblSavedMacros.selectedItems()
@@ -90,6 +84,24 @@ class MainWindow(QWidget):
             self.ui.btnDeleteMacro.setEnabled(False)
             for item in self.options_context.actionItems.values():
                 item.setEnabled(False)
+
+    def rename_macro(self):
+        nameDialog = QInputDialog.getText(None, "Rename Macro", "Please enter a new name for macro: " + self.selected_macro['name'].text())
+
+        if nameDialog[1]:
+            self.file_manager.renameMacro(self.selected_macro['filePath'], nameDialog[0])
+            self.record_macro.macro_saved.emit(True)
+
+    def delete_macro(self):
+        confirmDialog = QMessageBox()
+        confirmDialog.setWindowTitle("Delete Macro")
+        confirmDialog.setText("Are you sure you want to delete saved macro:\n" + self.selected_macro['name'].text())
+        confirmDialog.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+
+        if confirmDialog.exec() == QMessageBox.Yes:
+            if self.file_manager.deleteMacro(self.selected_macro['filePath']):
+                self.record_macro.macro_saved.emit(True)
+                QMessageBox.information(self, "Macro Deleted", "Macro Deleted Successfully")
 
     def record_new_macro(self):
         self.hide()

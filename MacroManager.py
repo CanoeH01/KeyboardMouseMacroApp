@@ -38,3 +38,10 @@ class MacroManager:
             file.seek(0)
             json.dump(macro, file)
             file.truncate()
+
+    def deleteMacro(self, macroPath):
+        filePath = Path(macroPath)
+        if filePath.exists():
+            filePath.unlink()
+            return True
+        return False
