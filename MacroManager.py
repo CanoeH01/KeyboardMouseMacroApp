@@ -22,6 +22,7 @@ class MacroManager:
     def loadMacro(self, file_path):
         with open(file_path, 'r') as file:
             events = json.load(file)
+        return events[1:]
 
     def loadMacrosMetaData(self):
         self.macros_metadata = []

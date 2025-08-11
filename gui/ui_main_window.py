@@ -90,7 +90,7 @@ class Ui_formMain(object):
     # setupUi
 
     def retranslateUi(self, formMain):
-        formMain.setWindowTitle(QCoreApplication.translate("formMain", u"Form", None))
+        formMain.setWindowTitle(QCoreApplication.translate("formMain", u"Macro Manager", None))
         self.btnOptions.setText(QCoreApplication.translate("formMain", u"\u2699\ufe0fOptions", None))
         self.btnRecordNewMacro.setText(QCoreApplication.translate("formMain", u"Record New Macro", None))
         self.lblSavedMacros.setText(QCoreApplication.translate("formMain", u"Saved Macros", None))
