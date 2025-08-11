@@ -1,6 +1,6 @@
 from datetime import datetime
 from PySide6 import QtWidgets
-from PySide6.QtCore import Qt, QThread
+from PySide6.QtCore import Qt, QThread, QTimer
 from PySide6.QtGui import QAction
 from PySide6.QtWidgets import QWidget, QTableWidgetItem, QMenu, QInputDialog, QMessageBox
 from keyboard import register_word_listener
@@ -21,6 +21,7 @@ class MainWindow(QWidget):
         self.replayer = None
         self.replay_thread = None
         self.isRepeated = False
+        self.is_repeating = False
         self.file_manager = MacroManager()
 
         self.populateMacrosList()
@@ -29,19 +30,7 @@ class MainWindow(QWidget):
         self.ui.tblSavedMacros.itemSelectionChanged.connect(self.on_macro_selected)
         self.ui.btnRecordNewMacro.clicked.connect(self.record_new_macro)
         self.record_macro.macro_saved.connect(self.populateMacrosList)
-        self.ui.btnPlayMacro.clicked.connect(self.playMacro)
-
-    def disableUI(self):
-        self.ui.btnPlayMacro.setEnabled(False)
-        self.ui.btnDeleteMacro.setEnabled(False)
-        for item in self.options_context.actionItems.values():
-            item.setEnabled(False)
-
-    def enableUI(self):
-        self.ui.btnPlayMacro.setEnabled(True)
-        self.ui.btnDeleteMacro.setEnabled(True)
-        for item in self.options_context.actionItems.values():
-            item.setEnabled(True)
+        self.ui.btnPlayMacro.clicked.connect(self.btnPlayMacro_clicked)
 
     def populateMacrosList(self):
         self.file_manager.loadMacrosMetaData()
@@ -87,11 +76,19 @@ class MainWindow(QWidget):
         if selected_items:
             self.selected_macro['name'] = selected_items[0]
             self.selected_macro['filePath'] = self.ui.tblSavedMacros.item(self.selected_macro['name'].row(), 0).data(Qt.UserRole)
-            self.enableUI()
+
+            self.ui.btnPlayMacro.setEnabled(True)
+            self.ui.btnDeleteMacro.setEnabled(True)
+            for item in self.options_context.actionItems.values():
+                item.setEnabled(True)
         else:
             self.selected_macro['name'] = None
             self.selected_macro['filePath'] = None
-            self.disableUI()
+
+            self.ui.btnPlayMacro.setEnabled(False)
+            self.ui.btnDeleteMacro.setEnabled(False)
+            for item in self.options_context.actionItems.values():
+                item.setEnabled(False)
 
     def rename_macro(self):
         nameDialog = QInputDialog.getText(None, "Rename Macro", "Please enter a new name for macro: " + self.selected_macro['name'].text())
@@ -118,29 +115,82 @@ class MainWindow(QWidget):
         else:
             self.isRepeated = False
 
-    def playMacro(self):
+    def btnPlayMacro_clicked(self):
+        if self.isRepeated:
+            if self.is_repeating:
+                self.stop_repeating()
+            else:
+                self.start_repeating()
+        else:
+            self.playMacro()
+
+    def playMacro(self, repeat = False):
         selectedMacro = self.file_manager.loadMacro(self.selected_macro['filePath'])
+        if not selectedMacro:
+            QMessageBox.critical(self, "Error", "Failed to load macro.")
+            return
 
-        if selectedMacro:
-            self.replay_thread = QThread()
-            self.replayer = ReplayerWorker(selectedMacro)
-            self.replayer.moveToThread(self.replay_thread)
+        self.replay_thread = QThread(self)
+        self.replayer = ReplayerWorker(selectedMacro)
+        self.replayer.moveToThread(self.replay_thread)
 
-            self.replay_thread.started.connect(self.replayer.start)
-            self.replayer.replaying_finished.connect(self.replaying_done)
-            self.replayer.replaying_finished.connect(self.replay_thread.quit)
-            self.replayer.replaying_finished.connect(self.replay_thread.deleteLater)
+        self.replay_thread.started.connect(self.replayer.start)
 
-            self.disableUI()
+        self.replayer.replaying_finished.connect(self.replaying_done)
+        self.replayer.replaying_finished.connect(self.replay_thread.quit)
+        self.replayer.replaying_finished.connect(self.replayer.deleteLater)
+
+        self.replay_thread.finished.connect(self.replay_thread.deleteLater)
+
+        if repeat:
+            self.replayer.replaying_finished.connect(self._repeat_if_needed)
+            self.setWindowTitle("Looping replay... press ESC to stop")
+        else:
             self.setWindowTitle("Replaying...")
 
-            self.replay_thread.start()
+        self.ui.btnOptions.setEnabled(False)
+        self.ui.btnRecordNewMacro.setEnabled(False)
+        self.ui.btnPlayMacro.setEnabled(False)
+        self.ui.btnDeleteMacro.setEnabled(False)
+        self.ui.lblSavedMacros.setEnabled(False)
+        self.ui.tblSavedMacros.setEnabled(False)
+        for item in self.options_context.actionItems.values():
+            item.setEnabled(False)
+
+        self.replay_thread.start()
+
+    def _repeat_if_needed(self):
+        if self.is_repeating:
+            QTimer.singleShot(100, lambda: self.playMacro(repeat=True))
+
+    def start_repeating(self):
+        if not self.is_repeating:
+            self.is_repeating = True
+            self.playMacro(repeat=True)
+
+    def stop_repeating(self):
+        self.is_repeating = False
 
     def replaying_done(self):
-        self.enableUI()
-        self.setWindowTitle("Macro Manager")
+        if not self.is_repeating:
+            self.setWindowTitle("Macro Manager")
+            self.ui.btnOptions.setEnabled(True)
+            self.ui.btnRecordNewMacro.setEnabled(True)
+            self.ui.btnPlayMacro.setEnabled(True)
+            self.ui.btnDeleteMacro.setEnabled(True)
+            self.ui.lblSavedMacros.setEnabled(True)
+            self.ui.tblSavedMacros.setEnabled(True)
+            for item in self.options_context.actionItems.values():
+                item.setEnabled(True)
 
     def record_new_macro(self):
         self.hide()
         self.record_macro.exec()
         self.show()
+
+    def keyPressEvent(self, event):
+        if event.key() == Qt.Key_Escape:
+            if self.is_repeating:
+                self.stop_repeating()
+        else:
+            super().keyPressEvent(event)
