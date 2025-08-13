@@ -1,9 +1,7 @@
 from datetime import datetime
-from PySide6 import QtWidgets
 from PySide6.QtCore import Qt, QThread, QTimer
 from PySide6.QtGui import QAction
 from PySide6.QtWidgets import QWidget, QTableWidgetItem, QMenu, QInputDialog, QMessageBox
-from keyboard import register_word_listener
 from ReplayerWorker import ReplayerWorker
 from gui.ui_main_window import Ui_formMain
 from gui.record_macro import RecordMacroForm
@@ -14,15 +12,14 @@ class MainWindow(QWidget):
         super().__init__()
         self.ui = Ui_formMain()
         self.ui.setupUi(self)
+        self.options_context = QMenu()
+
         self.record_macro = RecordMacroForm(self)
 
         self.selected_macro = {'name': None, 'filePath': None }
-        self.options_context = QMenu()
         self.replayer = None
-        self.replay_thread = None
-        self.isRepeated = False
-        self.is_repeating = False
         self.file_manager = MacroManager()
+        self.is_repeating = False
 
         self.populateMacrosList()
         self.createOptionsContextMenu()
@@ -62,7 +59,7 @@ class MainWindow(QWidget):
         self.options_context.actionItems['edit'] = (QAction("Edit", self))
         self.options_context.actionItems['repeat'] = (QAction("Repeat", self))
         self.options_context.actionItems['repeat'].setCheckable(True)
-        self.options_context.actionItems['repeat'].triggered.connect(self.repeat_macro)
+        self.options_context.actionItems['repeat'].triggered.connect(self.chkRepeatMacro_checked)
 
         for item in self.options_context.actionItems.values():
             item.setEnabled(False)
@@ -108,19 +105,16 @@ class MainWindow(QWidget):
                 self.record_macro.macro_saved.emit(True)
                 QMessageBox.information(self, "Macro Deleted", "Macro Deleted Successfully")
 
-    def repeat_macro(self):
+    def chkRepeatMacro_checked(self):
         self.options_context.show()
         if self.options_context.actionItems['repeat'].isChecked():
-            self.isRepeated = True
+            self.is_repeated = True
         else:
-            self.isRepeated = False
+            self.is_repeated = False
 
     def btnPlayMacro_clicked(self):
-        if self.isRepeated:
-            if self.is_repeating:
-                self.stop_repeating()
-            else:
-                self.start_repeating()
+        if self.options_context.actionItems['repeat'].isChecked():
+            self.start_repeating()
         else:
             self.playMacro()
 
@@ -130,17 +124,17 @@ class MainWindow(QWidget):
             QMessageBox.critical(self, "Error", "Failed to load macro.")
             return
 
-        self.replay_thread = QThread(self)
+        replay_thread = QThread(self)
         self.replayer = ReplayerWorker(selectedMacro)
-        self.replayer.moveToThread(self.replay_thread)
+        self.replayer.moveToThread(replay_thread)
 
-        self.replay_thread.started.connect(self.replayer.start)
+        replay_thread.started.connect(self.replayer.start)
 
         self.replayer.replaying_finished.connect(self.replaying_done)
-        self.replayer.replaying_finished.connect(self.replay_thread.quit)
+        self.replayer.replaying_finished.connect(replay_thread.quit)
         self.replayer.replaying_finished.connect(self.replayer.deleteLater)
 
-        self.replay_thread.finished.connect(self.replay_thread.deleteLater)
+        replay_thread.finished.connect(replay_thread.deleteLater)
 
         if repeat:
             self.replayer.replaying_finished.connect(self._repeat_if_needed)
@@ -157,7 +151,7 @@ class MainWindow(QWidget):
         for item in self.options_context.actionItems.values():
             item.setEnabled(False)
 
-        self.replay_thread.start()
+        replay_thread.start()
 
     def _repeat_if_needed(self):
         if self.is_repeating:
