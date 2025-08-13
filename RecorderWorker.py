@@ -22,4 +22,4 @@ class RecorderWorker(QObject):
             self.recorder.stop()
 
     def get_events(self):
-        return self.recorder.events
+        return self.recorder.steps

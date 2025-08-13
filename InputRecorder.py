@@ -4,7 +4,7 @@ from utils import getVirtualScreenBounds
 
 class InputRecorder:
     def __init__(self):
-        self.events = []
+        self.steps = []
         self.start_time = None
         self.screen_bounds = getVirtualScreenBounds()
 
@@ -19,11 +19,12 @@ class InputRecorder:
 
     def start(self):
         mouseStartingPoint = {
+            'id': len(self.steps) + 1,
             'type': 'mouse_move',
             'pos': mouse.Controller().position,
             'timestamp': 0
         }
-        self.events.append(mouseStartingPoint)
+        self.steps.append(mouseStartingPoint)
 
         self.start_time = time.time()
         self.mouseListener.start()
@@ -44,32 +45,36 @@ class InputRecorder:
 
     def on_move(self, x, y):
         mouseMovement = {
+            'id': len(self.steps) + 1,
             'type' : 'mouse_move',
             'pos': self.normalizePosition(x, y),
             'timestamp': self.getElapsedTime(),
         }
-        self.events.append(mouseMovement)
+        self.steps.append(mouseMovement)
 
     def on_click(self, x, y, button, pressed):
         mouseClick = {
+            'id': len(self.steps) + 1,
             'type' : 'mouse_click',
             'button': button,
             'pressed': pressed,
             'pos': self.normalizePosition(x, y),
             'timestamp': self.getElapsedTime(),
         }
-        self.events.append(mouseClick)
+        self.steps.append(mouseClick)
 
     def on_scroll(self, x, y, dx, dy):
         mouseScroll = {
+            'id': len(self.steps) + 1,
             'type' : 'mouse_scroll',
             'pos': (dx, dy),
             'timestamp': self.getElapsedTime(),
         }
-        self.events.append(mouseScroll)
+        self.steps.append(mouseScroll)
 
     def on_press(self, key):
         keyPress = {
+            'id': len(self.steps) + 1,
             'type' : 'key_press',
             'key': str(key),
             'timestamp': self.getElapsedTime(),
@@ -77,12 +82,13 @@ class InputRecorder:
         if key == keyboard.Key.esc:
             self.stop()
         else:
-            self.events.append(keyPress)
+            self.steps.append(keyPress)
 
     def on_release(self, key):
         keyRelease = {
+            'id': len(self.steps) + 1,
             'type' : 'key_release',
             'key': str(key),
             'timestamp': self.getElapsedTime(),
         }
-        self.events.append(keyRelease)
+        self.steps.append(keyRelease)
