@@ -3,7 +3,6 @@ from PySide6.QtCore import Qt, QThread, QTimer
 from PySide6.QtGui import QAction
 from PySide6.QtWidgets import QWidget, QTableWidgetItem, QMenu, QInputDialog, QMessageBox
 from ReplayerWorker import ReplayerWorker
-from gui.ui_edit_macro import Ui_formEdit
 from gui.ui_main_window import Ui_formMain
 from gui.record_macro import RecordMacroForm
 from gui.edit_macro import EditMacroForm
@@ -126,7 +125,7 @@ class MainWindow(QWidget):
             self.playMacro()
 
     def playMacro(self, repeat = False):
-        selectedMacro = self.file_manager.loadMacro(self.selected_macro['filePath'])
+        selectedMacro = self.file_manager.loadMacroSteps(self.selected_macro['filePath'])
         if not selectedMacro:
             QMessageBox.critical(self, "Error", "Failed to load macro.")
             return
@@ -190,8 +189,9 @@ class MainWindow(QWidget):
         self.show()
 
     def edit_macro(self):
+        selectedMacro = self.file_manager.loadMacro(self.selected_macro['filePath'])
         self.hide()
-        editMacroForm = EditMacroForm()
+        editMacroForm = EditMacroForm(selectedMacro)
         editMacroForm.exec()
         self.show()
 
