@@ -6,7 +6,6 @@ from RecorderWorker import RecorderWorker
 from gui.ui_record_macro import Ui_formRecord
 from MacroManager import MacroManager
 
-
 class RecordMacroForm(QDialog):
     macro_saved = Signal(bool)
 
