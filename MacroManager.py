@@ -38,6 +38,11 @@ class MacroManager:
     def loadMacro(self, file_path):
         with open(file_path, 'r') as file:
             macro = json.load(file)
+        return macro
+
+    def loadMacroSteps(self, file_path):
+        with open(file_path, 'r') as file:
+            macro = json.load(file)
         return macro["steps"]
 
     def loadMacrosMetaData(self):

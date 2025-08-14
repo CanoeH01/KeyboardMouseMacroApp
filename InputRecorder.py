@@ -56,7 +56,7 @@ class InputRecorder:
         mouseClick = {
             'id': len(self.steps) + 1,
             'type' : 'mouse_click',
-            'button': button,
+            'button': button.name,
             'pressed': pressed,
             'pos': self.normalizePosition(x, y),
             'timestamp': self.getElapsedTime(),

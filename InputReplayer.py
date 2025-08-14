@@ -1,6 +1,8 @@
 import time
 from pynput import mouse, keyboard
 from pynput.keyboard import Key
+from pynput.mouse import Button
+
 from utils import getVirtualScreenBounds
 
 
@@ -22,9 +24,9 @@ class InputReplayer:
                     self.mouse.position = self.deNormalizePosition(event['pos'][0], event['pos'][1])
                 case 'mouse_click':
                     if event['pressed']:
-                        self.mouse.press(event['button'])
+                        self.mouse.press(getattr(Button, event['button']))
                     else:
-                        self.mouse.release(event['button'])
+                        self.mouse.release(getattr(Button, event['button']))
                 case 'mouse_scroll':
                     self.mouse.scroll(event['pos'][0], event['pos'][1])
                 case 'key_press':
