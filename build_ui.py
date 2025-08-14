@@ -2,8 +2,8 @@ import os
 import subprocess
 
 UI_DIR = os.path.join(os.path.dirname(__file__), "gui")
-UI_FILES = [os.path.join(UI_DIR, "main_window.ui"), os.path.join(UI_DIR, "record_macro.ui")]
-OUTPUT_PY = [os.path.join(UI_DIR, "ui_main_window.py"), os.path.join(UI_DIR, "ui_record_macro.py")]
+UI_FILES = [os.path.join(UI_DIR, "main_window.ui"), os.path.join(UI_DIR, "record_macro.ui"), os.path.join(UI_DIR, "edit_macro.ui")]
+OUTPUT_PY = [os.path.join(UI_DIR, "ui_main_window.py"), os.path.join(UI_DIR, "ui_record_macro.py"), os.path.join(UI_DIR, "ui_edit_macro.py")]
 
 def convert_ui():
     for ui_file, output_py in zip(UI_FILES, OUTPUT_PY):

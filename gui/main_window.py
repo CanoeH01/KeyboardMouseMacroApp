@@ -3,8 +3,10 @@ from PySide6.QtCore import Qt, QThread, QTimer
 from PySide6.QtGui import QAction
 from PySide6.QtWidgets import QWidget, QTableWidgetItem, QMenu, QInputDialog, QMessageBox
 from ReplayerWorker import ReplayerWorker
+from gui.ui_edit_macro import Ui_formEdit
 from gui.ui_main_window import Ui_formMain
 from gui.record_macro import RecordMacroForm
+from gui.edit_macro import EditMacroForm
 from MacroManager import MacroManager
 
 class MainWindow(QWidget):
@@ -52,11 +54,16 @@ class MainWindow(QWidget):
     def createOptionsContextMenu(self):
         self.options_context = QMenu(self)
         self.options_context.actionItems = {}
+
         self.options_context.actionItems['rename'] = (QAction("Rename", self))
         self.options_context.actionItems['rename'].triggered.connect(self.rename_macro)
+
         self.options_context.actionItems['delete'] = (QAction("Delete", self))
         self.options_context.actionItems['delete'].triggered.connect(self.delete_macro)
+
         self.options_context.actionItems['edit'] = (QAction("Edit", self))
+        self.options_context.actionItems['edit'].triggered.connect(self.edit_macro)
+
         self.options_context.actionItems['repeat'] = (QAction("Repeat", self))
         self.options_context.actionItems['repeat'].setCheckable(True)
         self.options_context.actionItems['repeat'].triggered.connect(self.chkRepeatMacro_checked)
@@ -180,6 +187,12 @@ class MainWindow(QWidget):
     def record_new_macro(self):
         self.hide()
         self.record_macro.exec()
+        self.show()
+
+    def edit_macro(self):
+        self.hide()
+        editMacroForm = EditMacroForm()
+        editMacroForm.exec()
         self.show()
 
     def keyPressEvent(self, event):

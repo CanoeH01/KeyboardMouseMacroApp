@@ -95,6 +95,6 @@ class Ui_formMain(object):
         self.btnRecordNewMacro.setText(QCoreApplication.translate("formMain", u"Record New Macro", None))
         self.lblSavedMacros.setText(QCoreApplication.translate("formMain", u"Saved Macros", None))
         self.btnPlayMacro.setText(QCoreApplication.translate("formMain", u"Play", None))
-        self.btnDeleteMacro.setText(QCoreApplication.translate("formMain", u"Delete", None))
+        self.btnDeleteMacro.setText(QCoreApplication.translate("formMain", u"Schedule", None))
     # retranslateUi
 
