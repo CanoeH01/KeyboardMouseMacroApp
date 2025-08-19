@@ -30,6 +30,11 @@ class Ui_formMain(object):
         if (self.tblSavedMacros.columnCount() < 2):
             self.tblSavedMacros.setColumnCount(2)
         self.tblSavedMacros.setObjectName(u"tblSavedMacros")
+        sizePolicy = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+        sizePolicy.setHorizontalStretch(1)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.tblSavedMacros.sizePolicy().hasHeightForWidth())
+        self.tblSavedMacros.setSizePolicy(sizePolicy)
         self.tblSavedMacros.setFocusPolicy(Qt.FocusPolicy.ClickFocus)
         self.tblSavedMacros.setAutoFillBackground(False)
         self.tblSavedMacros.setStyleSheet(u"")

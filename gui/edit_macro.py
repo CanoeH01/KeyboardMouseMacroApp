@@ -1,5 +1,5 @@
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QDialog, QTreeWidgetItem, QHeaderView
+from PySide6.QtWidgets import QDialog, QTreeWidgetItem, QHeaderView, QHBoxLayout
 
 from gui.ui_edit_macro import Ui_formEdit
 
@@ -8,10 +8,10 @@ class EditMacroForm(QDialog):
         super().__init__()
         self.ui = Ui_formEdit()
         self.ui.setupUi(self)
+        self.ui.seqKeyPressed.setMaximumSequenceLength(1)
 
         self.selected_macro = macro
-
-        self.ui.lblMacroName.setText(self.selected_macro['name'])
+        self.ui.lblMacroName.setText(macro['name'])
         self.populateMacroTree()
 
     def populateMacroTree(self):
@@ -19,6 +19,7 @@ class EditMacroForm(QDialog):
         self.ui.treeMacroData.header().setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
         for step in self.selected_macro['steps']:
             self.addStepToTree(self.ui.treeMacroData, step)
+        self.ui.treeMacroData.itemSelectionChanged.connect(self.stepSelected)
 
     def addStepToTree(self, parent, step):
         item = QTreeWidgetItem(parent)
@@ -45,3 +46,29 @@ class EditMacroForm(QDialog):
         if "steps" in step:
             for child_step in step["steps"]:
                 self.addStepToTree(item, child_step)
+
+    def stepSelected(self):
+        if self.ui.treeMacroData.currentItem():
+            selected_step = self.ui.treeMacroData.currentItem().data(0, Qt.UserRole)
+
+            # may need to add more cases to account for variables?
+            match selected_step["type"]:
+                case "mouse_move":
+                    self.ui.stckEditor.setCurrentIndex(1)
+                case "mouse_click":
+                    self.ui.stckEditor.setCurrentIndex(2)
+                case "mouse_scroll":
+                    self.ui.stckEditor.setCurrentIndex(3)
+                case "key_press":
+                    self.ui.stckEditor.setCurrentIndex(4)
+                case "key_release":
+                    self.ui.stckEditor.setCurrentIndex(5)
+                case "if":
+                    self.ui.stckEditor.setCurrentIndex(6)
+                case _:
+                    self.ui.stckEditor.setCurrentIndex(0)
+        else:
+            self.ui.stckEditor.setCurrentIndex(0)
+
+    def moveSelected(self):
+        return # todo: create functions for each step type that hooks ui up to logic
