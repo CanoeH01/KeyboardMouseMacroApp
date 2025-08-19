@@ -201,3 +201,7 @@ class MainWindow(QWidget):
                 self.stop_repeating()
         else:
             super().keyPressEvent(event)
+
+    # todo: add check for monitor resolution to warn users before playback
+    # todo: add support for scheduling macros
+    # todo: add support for assigning macros to hotkeys
