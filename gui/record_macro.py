@@ -43,22 +43,37 @@ class RecordMacroForm(QDialog):
         self.recording_thread.start()
 
     def btnReplay_clicked(self):
-        if self.recorder:
-            self.replay_thread = QThread()
-            self.replayer = ReplayerWorker(self.recorder.get_events())
-            self.replayer.moveToThread(self.replay_thread)
+        if not self.recorder:
+            return
 
-            self.replay_thread.started.connect(self.replayer.start)
-            self.replayer.replaying_finished.connect(self.replaying_done)
-            self.replayer.replaying_finished.connect(self.replay_thread.quit)
-            self.replayer.replaying_finished.connect(self.replay_thread.deleteLater)
+        self.ui.btnReplay.setEnabled(False)
+        self.ui.btnRecord.setEnabled(False)
+        self.ui.btnSave.setEnabled(False)
+        self.setWindowTitle("Replaying...")
 
-            self.ui.btnReplay.setEnabled(False)
-            self.ui.btnRecord.setEnabled(False)
-            self.ui.btnSave.setEnabled(False)
-            self.setWindowTitle("Replaying...")
+        replay_thread = QThread(self)
+        replayer = ReplayerWorker(self.recorder.get_events())
+        replayer.moveToThread(replay_thread)
 
-            self.replay_thread.start()
+        replay_thread.started.connect(replayer.start)
+
+        def cleanup():
+            self.ui.btnReplay.setEnabled(True)
+            self.ui.btnRecord.setEnabled(True)
+            self.ui.btnSave.setEnabled(True)
+            self.setWindowTitle("Create Macro")
+            self.ui.lblStopRecording.setText("Macro recorded")
+
+        replayer.replaying_finished.connect(cleanup)
+
+        replayer.replaying_finished.connect(replayer.deleteLater)
+        replayer.replaying_finished.connect(replay_thread.quit)
+        replay_thread.finished.connect(replay_thread.deleteLater)
+
+        self.replayer = replayer
+        self.replay_thread = replay_thread
+
+        replay_thread.start()
 
     def keyPressEvent(self, event: QKeyEvent):
         if event.key() == Qt.Key_Escape and self.recorder:
