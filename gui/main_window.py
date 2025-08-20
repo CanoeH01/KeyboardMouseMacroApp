@@ -191,7 +191,7 @@ class MainWindow(QWidget):
     def edit_macro(self):
         selectedMacro = self.file_manager.loadMacro(self.selected_macro['filePath'])
         self.hide()
-        editMacroForm = EditMacroForm(selectedMacro)
+        editMacroForm = EditMacroForm(selectedMacro, self.selected_macro['filePath'])
         editMacroForm.exec()
         self.show()
 
