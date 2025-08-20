@@ -21,7 +21,7 @@ class InputRecorder:
         mouseStartingPoint = {
             'id': len(self.steps) + 1,
             'type': 'mouse_move',
-            'pos': mouse.Controller().position,
+            'pos': self.normalizePosition(mouse.Controller().position[0], mouse.Controller().position[1]),
             'timestamp': 0
         }
         self.steps.append(mouseStartingPoint)
