@@ -62,6 +62,10 @@ class MacroManager:
             json.dump(macro, file)
             file.truncate()
 
+    def updateMacro(self, macroPath, macroData):
+        with open (macroPath, 'w') as file:
+            json.dump(macroData, file, indent=4)
+
     def deleteMacro(self, macroPath):
         filePath = Path(macroPath)
         if filePath.exists():
