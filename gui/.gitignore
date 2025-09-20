@@ -1,0 +1,4 @@
+# ignore saved macros
+*
+
+!.gitignore
