@@ -1,5 +1,5 @@
 from PySide6.QtCore import Qt, QThread, Signal
-from PySide6.QtGui import QKeyEvent, QColor
+from PySide6.QtGui import QKeyEvent, QColor, QIcon
 from PySide6.QtWidgets import QInputDialog, QDialog, QGraphicsDropShadowEffect
 from ReplayerWorker import ReplayerWorker
 from RecorderWorker import RecorderWorker
@@ -13,6 +13,7 @@ class RecordMacroForm(QDialog):
         super().__init__()
         self.ui = Ui_formRecord()
         self.ui.setupUi(self)
+        self.setWindowIcon(QIcon('gui/cursoricon.png'))
 
         self.recorder = None
         self.recording_thread = None
@@ -38,6 +39,7 @@ class RecordMacroForm(QDialog):
         self.ui.btnSave.setEnabled(False)
 
         self.setWindowTitle("Recording...")
+        self.setWindowIcon(QIcon('gui/recordingicon.png'))
         self.ui.lblStopRecording.setText("Press ESC to stop")
 
         self.recording_thread.start()
@@ -86,12 +88,14 @@ class RecordMacroForm(QDialog):
         self.setWindowTitle("Create Macro")
         self.ui.lblStopRecording.setText("Macro recorded")
 
+
     def recording_done(self):
         self.ui.btnReplay.setEnabled(True)
         self.ui.btnRecord.setEnabled(True)
         self.ui.btnSave.setEnabled(True)
         self.setWindowTitle("Create Macro")
         self.ui.lblStopRecording.setText("Macro recorded")
+        self.setWindowIcon(QIcon('gui/cursoricon.png'))
         self.recording_thread.quit()
         self.recording_thread.wait()
 

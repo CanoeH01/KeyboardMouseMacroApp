@@ -1,6 +1,6 @@
 from datetime import datetime
 from PySide6.QtCore import Qt, QThread, QTimer
-from PySide6.QtGui import QAction
+from PySide6.QtGui import QAction, QIcon
 from PySide6.QtWidgets import QWidget, QTableWidgetItem, QMenu, QInputDialog, QMessageBox
 from ReplayerWorker import ReplayerWorker
 from gui.ui_main_window import Ui_formMain
@@ -13,6 +13,7 @@ class MainWindow(QWidget):
         super().__init__()
         self.ui = Ui_formMain()
         self.ui.setupUi(self)
+        self.setWindowIcon(QIcon('gui/cursoricon.png'))
         self.options_context = QMenu()
 
         self.record_macro = RecordMacroForm(self)
@@ -29,6 +30,7 @@ class MainWindow(QWidget):
         self.ui.btnRecordNewMacro.clicked.connect(self.record_new_macro)
         self.record_macro.macro_saved.connect(self.populateMacrosList)
         self.ui.btnPlayMacro.clicked.connect(self.btnPlayMacro_clicked)
+        self.ui.btnDeleteMacro.clicked.connect(self.delete_macro)
 
     def populateMacrosList(self):
         self.file_manager.loadMacrosMetaData()
@@ -56,9 +58,6 @@ class MainWindow(QWidget):
 
         self.options_context.actionItems['rename'] = (QAction("Rename", self))
         self.options_context.actionItems['rename'].triggered.connect(self.rename_macro)
-
-        self.options_context.actionItems['delete'] = (QAction("Delete", self))
-        self.options_context.actionItems['delete'].triggered.connect(self.delete_macro)
 
         self.options_context.actionItems['edit'] = (QAction("Edit", self))
         self.options_context.actionItems['edit'].triggered.connect(self.edit_macro)

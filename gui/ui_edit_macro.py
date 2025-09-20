@@ -193,6 +193,7 @@ class Ui_formEdit(object):
         self.seqKeyPressed = QKeySequenceEdit(self.pgKeyPress)
         self.seqKeyPressed.setObjectName(u"seqKeyPressed")
         self.seqKeyPressed.setClearButtonEnabled(False)
+        self.seqKeyPressed.setMaximumSequenceLength(1)
 
         self.gridLayout_3.addWidget(self.seqKeyPressed, 2, 1, 1, 1)
 
@@ -215,6 +216,7 @@ class Ui_formEdit(object):
         self.seqKeyReleased = QKeySequenceEdit(self.pgKeyRelease)
         self.seqKeyReleased.setObjectName(u"seqKeyReleased")
         self.seqKeyReleased.setClearButtonEnabled(False)
+        self.seqKeyReleased.setMaximumSequenceLength(1)
 
         self.gridLayout_4.addWidget(self.seqKeyReleased, 2, 0, 1, 1)
 

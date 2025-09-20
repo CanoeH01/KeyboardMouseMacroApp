@@ -1,4 +1,5 @@
 from PySide6.QtCore import Qt
+from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import QDialog, QTreeWidgetItem, QHeaderView, QMessageBox
 
 from MacroManager import MacroManager
@@ -9,6 +10,7 @@ class EditMacroForm(QDialog):
         super().__init__(parent)
         self.ui = Ui_formEdit()
         self.ui.setupUi(self)
+        self.setWindowIcon(QIcon('gui/cursoricon.png'))
         self.ui.seqKeyPressed.setMaximumSequenceLength(1)
 
         self.selected_macro = macro
