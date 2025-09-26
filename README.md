@@ -72,7 +72,7 @@ This was a solo project, created over summer of second year as part of my prepar
 
 Some of the biggest challenges I overcame during development have been normalising mouse input across multi-monitor setups, learning about threading to keep the GUI responsive while recording or replaying macros, and creating a modular design that supports future expansion.
 
-What I’m most proud of is being able to take my own abstract idea and turining to a fully working desktop app for the first time. With a usable GUI, a solid file system, and room to grow.
+What I’m most proud of is being able to take my own abstract idea and turning to a fully working desktop app for the first time. With a usable GUI, a solid file system, and room to grow.
 
 ## 📜 License
 
